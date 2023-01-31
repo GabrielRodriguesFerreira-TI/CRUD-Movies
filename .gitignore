@@ -1,0 +1,15 @@
+logs
+*.log
+package-lock.log*
+package-lock.json
+workspaceInsomnia.json
+
+node_modules
+dist
+dist-ssr
+*.local
+
+.vscode/*
+!.vscode/extensios.json
+.idea
+.DS_Store
