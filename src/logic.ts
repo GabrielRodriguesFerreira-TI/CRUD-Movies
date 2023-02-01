@@ -36,9 +36,8 @@ export const getAllMovies = async (
   res: Response
 ): Promise<Response<iMovies, Record<string, iMovies>>> => {
   try {
-    let perPage =
-      req.query.perPage === undefined ? 5 : Number(req.query.perPage);
-    let page = req.query.page === undefined ? 1 : Number(req.query.page);
+    let page: number = Number(req.query.page) || 1;
+    let perPage: number = Number(req.query.perPage) || 5;
     let sort = req.query.sort === undefined ? null : req.query.sort.toString();
     let order =
       req.query.order === undefined ? null : req.query.order.toString();
