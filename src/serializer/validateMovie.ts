@@ -42,8 +42,10 @@ export const validateMovieData = (payload: iMovies): iMovies => {
     throw new Error("The movie name need to be a string");
   }
 
-  if (!typeOf("string", payload?.description)) {
-    throw new Error("The movie description need to be a string");
+  if (payload.description) {
+    if (!typeOf("string", payload.description)) {
+      throw new Error("The movie description need to be a string");
+    }
   }
 
   if (!typeOf("number", payload.duration)) {

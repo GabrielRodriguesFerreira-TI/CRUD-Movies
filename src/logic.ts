@@ -39,7 +39,7 @@ export const getAllMovies = async (
   try {
     const query = validateQuery(req);
 
-    const queryResult = await client.query(query.queryString);
+    let queryResult = await client.query(query.queryString);
 
     const baseUrl: string = `http://localhost:3000/movies/`;
     const previusPage: string | null =
@@ -50,11 +50,11 @@ export const getAllMovies = async (
           }`;
 
     const nextPage: string | null =
-      queryResult.rowCount <= 0
-        ? null
-        : `${baseUrl}?page=${Number(query.pageUrl) + 1}&perPage=${
+      queryResult.rowCount === query.perPage
+        ? `${baseUrl}?page=${Number(query.pageUrl) + 1}&perPage=${
             query.perPage
-          }`;
+          }`
+        : null;
 
     const pagination = {
       previusPage,
@@ -93,7 +93,7 @@ export const updateMovie = async (
 
     const queryResult = await client.query(queryString);
 
-    return res.status(200).json(queryResult.rows);
+    return res.status(200).json(queryResult.rows[0]);
   } catch (error: unknown) {
     if (error instanceof Error) {
       if (
