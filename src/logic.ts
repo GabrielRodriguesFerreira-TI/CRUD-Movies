@@ -3,6 +3,7 @@ import { ProductResult, iMovies } from "./interfaces/tables";
 import { validateMovieData } from "./serializer/validateMovie";
 import { client, movies } from "./database";
 import format from "pg-format";
+import { validateQuery } from "./serializer/validateQuery";
 
 export const createMovie = async (
   req: Request,
@@ -36,77 +37,24 @@ export const getAllMovies = async (
   res: Response
 ): Promise<Response<iMovies, Record<string, iMovies>>> => {
   try {
-    let page: number = Number(req.query.page) || 1;
-    let perPage: number = Number(req.query.perPage) || 5;
-    let sort = req.query.sort === undefined ? null : req.query.sort.toString();
-    let order =
-      req.query.order === undefined ? null : req.query.order.toString();
+    const query = validateQuery(req);
 
-    if (page <= 0) {
-      page = 1;
-    }
-
-    if (perPage > 5 || perPage <= 0) {
-      perPage = 5;
-    }
-
-    if (sort?.toLowerCase() !== "price" && sort?.toLowerCase() !== "duration") {
-      sort = null;
-    }
-
-    if (sort?.toLowerCase() !== null && order?.toUpperCase() !== "DESC") {
-      order = "ASC";
-    }
-
-    const pageUrl = page;
-
-    page = page * perPage - perPage;
-
-    let queryString: string = "";
-
-    if (sort === null) {
-      queryString = format(
-        `
-         SELECT
-              *
-         FROM
-              movies
-         LIMIT %s OFFSET %s;
-        `,
-
-        perPage,
-        page
-      );
-    } else {
-      queryString = format(
-        `
-          SELECT
-              *
-          FROM
-              movies
-          ORDER BY "%s" %s
-          LIMIT %s OFFSET %s;
-        `,
-
-        sort,
-        order,
-        perPage,
-        page
-      );
-    }
-
-    const queryResult = await client.query(queryString);
+    const queryResult = await client.query(query.queryString);
 
     const baseUrl: string = `http://localhost:3000/movies/`;
     const previusPage: string | null =
-      page <= 0
+      query.page <= 0
         ? null
-        : `${baseUrl}?page=${Number(pageUrl) - 1}&perPage=${perPage}`;
+        : `${baseUrl}?page=${Number(query.pageUrl) - 1}&perPage=${
+            query.perPage
+          }`;
 
     const nextPage: string | null =
       queryResult.rowCount <= 0
         ? null
-        : `${baseUrl}?page=${Number(pageUrl) + 1}&perPage=${perPage}`;
+        : `${baseUrl}?page=${Number(query.pageUrl) + 1}&perPage=${
+            query.perPage
+          }`;
 
     const pagination = {
       previusPage,
